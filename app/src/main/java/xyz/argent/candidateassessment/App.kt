@@ -1,6 +1,7 @@
-package xyz.argent.candidateassessment.app
+package xyz.argent.candidateassessment
 
 import android.app.Application
+import xyz.argent.candidateassessment.di.Dependencies
 
 class App : Application() {
 

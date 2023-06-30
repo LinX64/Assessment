@@ -1,4 +1,4 @@
-package xyz.argent.candidateassessment.app
+package xyz.argent.candidateassessment.data.util
 
 object Constants {
     const val walletAddress= "0xde57844f758a0a6a1910a4787ab2f7121c8978c3"

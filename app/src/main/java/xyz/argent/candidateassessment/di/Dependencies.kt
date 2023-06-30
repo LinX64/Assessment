@@ -1,4 +1,4 @@
-package xyz.argent.candidateassessment.app
+package xyz.argent.candidateassessment.di
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -6,8 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import xyz.argent.candidateassessment.balanceRetriever.EtherscanApi
-import xyz.argent.candidateassessment.tokenRegistry.EthExplorerApi
+import xyz.argent.candidateassessment.App
+import xyz.argent.candidateassessment.data.balanceRetriever.EtherscanApi
+import xyz.argent.candidateassessment.data.tokenRegistry.EthExplorerApi
 
 /** Some manual dependency injection to simplify here */
 class Dependencies(

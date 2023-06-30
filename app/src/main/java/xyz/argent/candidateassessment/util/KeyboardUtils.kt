@@ -1,4 +1,4 @@
-package xyz.argent.candidateassessment.basePresentation
+package xyz.argent.candidateassessment.util
 
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -8,7 +8,7 @@ object KeyboardUtils {
 
     fun showKeyboard(editText: EditText) {
         if (editText.requestFocus()) {
-            editText.context.getSystemService<InputMethodManager>()!!.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+            editText.context.getSystemService<InputMethodManager>()?.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 
