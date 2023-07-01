@@ -21,19 +21,19 @@ import xyz.argent.candidateassessment.ui.navigation.NavRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppTopAppBar(
+fun TopAppBar(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     destination: NavDestination?
 ) {
     CenterAlignedTopAppBar(
+        modifier = modifier.fillMaxWidth(),
         title = {
             Text(
                 text = "Argent",
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize
             )
         },
-        modifier = modifier.fillMaxWidth(),
         navigationIcon = {
             if (destination?.route != NavRoutes.IntroScreen) {
                 BackButton(onClick = { navController.popBackStack() })

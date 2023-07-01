@@ -2,6 +2,7 @@ package xyz.argent.candidateassessment.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,7 +10,7 @@ import xyz.argent.candidateassessment.ui.views.IntroRoute
 import xyz.argent.candidateassessment.ui.views.tokens.TokensRoute
 
 @Composable
-fun AppNavHost(
+internal fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -18,16 +19,23 @@ fun AppNavHost(
         startDestination = NavRoutes.IntroScreen,
         modifier = modifier
     ) {
-        composable(NavRoutes.IntroScreen) {
-            IntroRoute(
-                onButtonClick = { navController.navigate(NavRoutes.TokensScreen) }
-            )
-        }
+        introScreen(navController)
+        tokensScreen(navController)
+    }
+}
 
-        composable(NavRoutes.TokensScreen) {
-            TokensRoute(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
+private fun NavGraphBuilder.introScreen(navController: NavHostController) {
+    composable(NavRoutes.IntroScreen) {
+        IntroRoute(
+            onButtonClick = { navController.navigate(NavRoutes.TokensScreen) }
+        )
+    }
+}
+
+private fun NavGraphBuilder.tokensScreen(navController: NavHostController) {
+    composable(NavRoutes.TokensScreen) {
+        TokensRoute(
+            onBackClick = { navController.popBackStack() }
+        )
     }
 }

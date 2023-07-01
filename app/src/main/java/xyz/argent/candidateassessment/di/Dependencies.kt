@@ -6,17 +6,20 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import xyz.argent.candidateassessment.App
-import xyz.argent.candidateassessment.data.balanceRetriever.EtherscanApi
-import xyz.argent.candidateassessment.data.tokenRegistry.EthExplorerApi
+import xyz.argent.candidateassessment.data.network.balanceRetriever.EtherscanApi
+import xyz.argent.candidateassessment.data.network.tokenRegistry.EthExplorerApi
+import xyz.argent.candidateassessment.data.repository.TokensRepository
+import xyz.argent.candidateassessment.data.repository.TokensRepositoryImpl
+
+interface DependenciesContainer {
+    val tokensRepository: TokensRepository
+}
 
 /** Some manual dependency injection to simplify here */
-class Dependencies(
-    val appContext: App,
-) {
+class Dependencies : DependenciesContainer {
 
-    val etherscanApi: EtherscanApi
-    val ethExplorerApi: EthExplorerApi
+    private val etherscanApi: EtherscanApi
+    private val ethExplorerApi: EthExplorerApi
 
     init {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -43,5 +46,12 @@ class Dependencies(
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(EtherscanApi::class.java)
+
+        // TODO: Use caching for the API calls
+    }
+
+    override val tokensRepository: TokensRepository by lazy {
+        TokensRepositoryImpl(ethExplorerApi)
     }
 }
+
