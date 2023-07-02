@@ -13,15 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import xyz.argent.candidateassessment.data.model.TokenResponse
-import xyz.argent.candidateassessment.ui.views.tokens.SearchResultBody
+import xyz.argent.candidateassessment.ui.views.tokens.TokenResult
 
 @Composable
 fun TokenRow(
     modifier: Modifier = Modifier,
-    token: TokenResponse
+    token: TokenResult
 ) {
     Card(
         modifier = modifier
@@ -29,17 +27,17 @@ fun TokenRow(
             .height(64.dp),
     ) {
         Column(modifier = modifier.fillMaxSize()) {
-            USDCBalanceRow(token = token)
+            USDCBalanceRow(balance = token.balance)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            USDTBalanceRow(token = token)
+            USDTBalanceRow(name = token.name)
         }
     }
 }
 
 @Composable
-private fun USDCBalanceRow(token: TokenResponse) {
+private fun USDCBalanceRow(balance: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -47,43 +45,20 @@ private fun USDCBalanceRow(token: TokenResponse) {
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "USDC")
+        Text(text = "USDC Balance:")
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "234234324")
     }
 }
 
 @Composable
-private fun USDTBalanceRow(token: TokenResponse) {
+private fun USDTBalanceRow(name: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Text(text = token.name.toString())
+        Text(text = "USDT Balance:")
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = token.symbol.toString())
+        Text(text = name)
     }
-}
-
-@Composable
-@Preview
-fun SearchResultBodyPreview() {
-    SearchResultBody(
-        tokens = listOf(
-            TokenResponse(
-                "USDC",
-                "234234324",
-                "0x1234",
-                56464,
-                "0x1234",
-            ),
-            TokenResponse(
-                "USDC",
-                "234234324",
-                "0x1234",
-                56464,
-                "0x1234",
-            )
-        )
-    )
 }

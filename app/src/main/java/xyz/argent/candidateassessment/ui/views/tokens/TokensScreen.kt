@@ -3,8 +3,9 @@ package xyz.argent.candidateassessment.ui.views.tokens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -12,7 +13,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import xyz.argent.candidateassessment.data.model.TokenResponse
 import xyz.argent.candidateassessment.ui.views.components.TokenRow
 import xyz.argent.candidateassessment.ui.views.tokens.components.SearchToolbar
 
@@ -22,10 +22,10 @@ internal fun TokensRoute(
 ) {
     val tokensViewModel: TokensViewModel =
         viewModel(factory = TokensViewModel.Factory)
-    val tokensUiState by tokensViewModel.searchUiState.collectAsStateWithLifecycle()
+    val searchResultState by tokensViewModel.searchResultState.collectAsStateWithLifecycle()
     val searchQuery by tokensViewModel.searchQuery.collectAsStateWithLifecycle()
     TokensScreen(
-        tokensUiState = tokensUiState,
+        searchResultState = searchResultState,
         searchQuery = searchQuery,
         onBackClick = onBackClick,
         onSearchQueryChanged = tokensViewModel::onSearchQueryChanged
@@ -35,11 +35,11 @@ internal fun TokensRoute(
 @Composable
 fun TokensScreen(
     modifier: Modifier = Modifier,
-    tokensUiState: TokensUiState,
+    searchResultState: TokensUiState,
     searchQuery: String = "",
     onBackClick: () -> Unit = {},
     onSearchQueryChanged: (String) -> Unit = {},
-    onSearchTriggered: (String) -> Unit = {},
+    onSearchTriggered: (String) -> Unit = {}
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         SearchToolbar(
@@ -49,27 +49,29 @@ fun TokensScreen(
             searchQuery = searchQuery
         )
 
-        when (tokensUiState) {
-            is TokensUiState.Loading -> {
+        when (searchResultState) {
+            TokensUiState.EmptyQuery -> {
+                println("Empty query")
+            }
+
+            TokensUiState.EmptyResponse -> {
+                println("Empty response")
+            }
+
+            TokensUiState.Loading -> {
                 println("Loading")
             }
 
-            is TokensUiState.Success -> {
-                val tokens = tokensUiState.tokens
-                SearchResultBody(tokens = tokens)
-            }
-
-            is TokensUiState.EmptyResult -> {
-                println("Empty result")
-            }
-
-            TokensUiState.EmptyQuery -> {
-
-            }
-            TokensUiState.LoadFailed -> {
-            }
             TokensUiState.SearchNotReady -> {
+                println("Search not ready")
+            }
 
+            is TokensUiState.LoadingFailed -> {
+                println("Loading failed: ${searchResultState.error}")
+            }
+
+            is TokensUiState.Success -> {
+                SearchResultBody(tokenResult = searchResultState.tokenResult)
             }
         }
     }
@@ -78,14 +80,20 @@ fun TokensScreen(
 @Composable
 fun SearchResultBody(
     modifier: Modifier = Modifier,
-    tokens: List<TokenResponse>
+    tokenResult: TokenResult
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(tokens) { token ->
-            TokenRow(token = token)
+        item(key = tokenResult.name) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                TokenRow(token = tokenResult)
+            }
         }
     }
 }
@@ -93,15 +101,15 @@ fun SearchResultBody(
 @Preview
 @Composable
 private fun TokensPreview() {
-    TokensScreen(
+    /*TokensScreen(
         tokensUiState = TokensUiState.Success(
             listOf(
                 TokenResponse(
                     "USDC",
                     "USD Coin",
-                    "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon",
-                    decimals = 6454,
-                    image = "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon",
+                    "USD_Coin",
+                    decimals = 6454.0,
+                    image = "ADDDS",
                 )
             )
         ),
@@ -109,5 +117,5 @@ private fun TokensPreview() {
         onBackClick = {},
         onSearchQueryChanged = {},
         onSearchTriggered = {}
-    )
+    )*/
 }

@@ -8,6 +8,6 @@ data class TokenResponse(
     val address: String,
     val name: String?,
     val symbol: String?,
-    val decimals: Long?,
+    val decimals: Double?,
     val image: String?,
 )
