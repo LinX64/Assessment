@@ -28,7 +28,6 @@ import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
 import xyz.argent.candidateassessment.domain.GetTokenAddressUseCase
-import java.math.BigDecimal
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -37,7 +36,7 @@ class TokensViewModel(
     private val getTokenAddressUseCase: GetTokenAddressUseCase
 ) : ViewModel() {
 
-    val searchQuery = savedStateHandle.getStateFlow(SEARCH_QUERY, "")
+    private val searchQuery = savedStateHandle.getStateFlow(SEARCH_QUERY, "")
     private val tokens = mutableListOf<TokenResponse>()
 
     val topTokensState: StateFlow<TokensUiState> = tokensRepository.getTopTokens()
@@ -93,8 +92,12 @@ class TokensViewModel(
             }
     }
 
-    fun onSearchQueryChanged(myQuery: String) {
+    fun onSearchClick(myQuery: String) {
         savedStateHandle[SEARCH_QUERY] = myQuery
+    }
+
+    fun onClear() {
+        savedStateHandle[SEARCH_QUERY] = ""
     }
 
     /**

@@ -34,8 +34,6 @@ private fun NavGraphBuilder.introScreen(navController: NavHostController) {
 
 private fun NavGraphBuilder.tokensScreen(navController: NavHostController) {
     composable(NavRoutes.TokensScreen) {
-        TokensRoute(
-            onBackClick = { navController.popBackStack() }
-        )
+        TokensRoute()
     }
 }

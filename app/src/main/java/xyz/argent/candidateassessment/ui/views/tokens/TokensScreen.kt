@@ -1,125 +1,109 @@
 package xyz.argent.candidateassessment.ui.views.tokens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import xyz.argent.candidateassessment.ui.views.components.TokenRow
-import xyz.argent.candidateassessment.ui.views.tokens.components.SearchToolbar
+import xyz.argent.candidateassessment.ui.views.components.BaseCenterColumn
+import xyz.argent.candidateassessment.ui.views.tokens.components.ProgressBar
+import xyz.argent.candidateassessment.ui.views.tokens.components.SearchBarView
 
 @Composable
-internal fun TokensRoute(
-    onBackClick: () -> Unit
-) {
+fun TokensRoute() {
     val tokensViewModel: TokensViewModel =
         viewModel(factory = TokensViewModel.Factory)
     val searchResultState by tokensViewModel.searchResultState.collectAsStateWithLifecycle()
     val topTokensState by tokensViewModel.topTokensState.collectAsStateWithLifecycle()
-    val searchQuery by tokensViewModel.searchQuery.collectAsStateWithLifecycle()
+    // Can't remove this because the ViewModel is not initialized yet, can be fixed by adding hiltViewModel()
 
     TokensScreen(
         searchResultState = searchResultState,
-        searchQuery = searchQuery,
-        onBackClick = onBackClick,
-        onSearchQueryChanged = tokensViewModel::onSearchQueryChanged
+        onSearchClick = tokensViewModel::onSearchClick,
+        onClear = tokensViewModel::onClear
     )
 }
 
 @Composable
-fun TokensScreen(
-    modifier: Modifier = Modifier,
+internal fun TokensScreen(
     searchResultState: TokensUiState,
-    searchQuery: String = "",
-    onBackClick: () -> Unit = {},
-    onSearchQueryChanged: (String) -> Unit = {},
-    onSearchTriggered: (String) -> Unit = {}
+    onSearchClick: (String) -> Unit = {},
+    onClear: () -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
-        SearchToolbar(
-            onBackClick = onBackClick,
-            onSearchQueryChanged = onSearchQueryChanged,
-            onSearchTriggered = onSearchTriggered,
-            searchQuery = searchQuery
-        )
+    val shouldTheTextBeShown = remember { mutableStateOf(true) }
 
-        when (searchResultState) {
-            TokensUiState.EmptyQuery -> {
-                println("Empty query")
-            }
+    SearchBarView(
+        searchUiState = searchResultState,
+        onSearchClick = onSearchClick,
+        isSearchViewActive = { shouldTheTextBeShown.value = !it },
+        onClear = onClear
+    )
 
-            TokensUiState.EmptyResponse -> {
-                println("Empty response")
-            }
+    if (shouldTheTextBeShown.value) {
+        DefaultContent()
+    }
 
-            TokensUiState.Loading -> {
-                println("Loading")
-            }
+    when (searchResultState) {
+        is TokensUiState.EmptyResponse -> EmptyResponseView()
+        is TokensUiState.Loading -> ProgressBar()
+        is TokensUiState.LoadingFailed -> LoadingFailedView()
 
-            TokensUiState.SearchNotReady -> {
-                println("Search not ready")
-            }
-
-            is TokensUiState.LoadingFailed -> {
-                println("Loading failed: ${searchResultState.error}")
-            }
-
-            is TokensUiState.Success -> {
-                SearchResultBody(balance = searchResultState.balance)
-            }
-
-            else -> {}
-        }
+        else -> Unit
     }
 }
 
 @Composable
-fun SearchResultBody(
-    modifier: Modifier = Modifier,
-    balance: String
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item(key = balance) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                TokenRow(balance = balance)
-            }
-        }
+private fun EmptyResponseView() {
+    BaseCenterColumn {
+        Text(
+            text = "No results found",
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .height(24.dp)
+        )
     }
 }
 
-@Preview
+@Composable
+private fun LoadingFailedView() {
+    BaseCenterColumn {
+        Text(
+            text = "Something went wrong",
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .height(24.dp)
+        )
+    }
+}
+
+@Composable
+private fun DefaultContent() {
+    BaseCenterColumn {
+        Text(
+            text = "Please enter a token name to search for",
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "i.e. USDT, ETH, BTC")
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true, backgroundColor = 0xFFFFFFFF)
 @Composable
 private fun TokensPreview() {
-    /*TokensScreen(
-        tokensUiState = TokensUiState.Success(
-            listOf(
-                TokenResponse(
-                    "USDC",
-                    "USD Coin",
-                    "USD_Coin",
-                    decimals = 6454.0,
-                    image = "ADDDS",
-                )
-            )
-        ),
-        searchQuery = "USDC",
-        onBackClick = {},
-        onSearchQueryChanged = {},
-        onSearchTriggered = {}
-    )*/
+    TokensScreen(
+        searchResultState = TokensUiState.Success(balance = "1000"),
+        onClear = {},
+    )
 }

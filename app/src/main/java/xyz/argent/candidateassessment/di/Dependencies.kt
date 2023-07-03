@@ -66,6 +66,7 @@ class Dependencies(
         val myCache = Cache(appContext.cacheDir, cacheSize)
 
         val sharedOkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
             .addInterceptor(offlineInterceptor)
             .addNetworkInterceptor(onlineInterceptor)
             .cache(myCache)

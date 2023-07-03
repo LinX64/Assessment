@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import xyz.argent.candidateassessment.ui.views.tokens.TokenResult
 
 @Composable
 fun TokenRow(
@@ -25,8 +27,16 @@ fun TokenRow(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp),
+        border = CardDefaults.outlinedCardBorder(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
     ) {
-        Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
             USDCBalanceRow(balance = balance)
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -41,24 +51,33 @@ private fun USDCBalanceRow(balance: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 5.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+            .padding(start = 8.dp, end = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "USDC Balance:")
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "234234324")
+        Text(text = balance)
     }
 }
 
 @Composable
 private fun USDTBalanceRow(name: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "USDT Balance:")
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = name)
     }
+}
+
+@Composable
+@Preview
+private fun TokenRowPreview() {
+    TokenRow(balance = "100")
 }
