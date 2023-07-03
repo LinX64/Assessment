@@ -6,6 +6,8 @@ import android.net.NetworkInfo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.Cache
+import okhttp3.Interceptor
+import okhttp3.Interceptor.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -17,10 +19,14 @@ import xyz.argent.candidateassessment.data.repository.balance.BalanceRepository
 import xyz.argent.candidateassessment.data.repository.balance.BalanceRepositoryImpl
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepositoryImpl
+import xyz.argent.candidateassessment.domain.GetTokenAddressUseCase
+
 
 interface DependenciesContainer {
     val tokensRepository: TokensRepository
     val balanceRepository: BalanceRepository
+
+    val getTokenAddressUseCase: GetTokenAddressUseCase
 }
 
 /** Some manual dependency injection to simplify here */
@@ -36,23 +42,33 @@ class Dependencies(
             setLevel(HttpLoggingInterceptor.Level.BASIC)
         }
 
+        val onlineInterceptor = Interceptor { chain ->
+            val response = chain.proceed(chain.request())
+            val maxAge = 60
+            response.newBuilder()
+                .header("Cache-Control", "public, max-age=$maxAge")
+                .removeHeader("Pragma")
+                .build()
+        }
+        val offlineInterceptor = Interceptor { chain ->
+            var request = chain.request()
+            if (!isInternetAvailable(appContext)) {
+                val maxStale = 60 * 60 * 24 * 30 // Offline cache available for 30 days
+                request = request.newBuilder()
+                    .header("Cache-Control", "public, only-if-cached, max-stale=$maxStale")
+                    .removeHeader("Pragma")
+                    .build()
+            }
+            chain.proceed(request)
+        }
+
         val cacheSize = (5 * 1024 * 1024).toLong()
         val myCache = Cache(appContext.cacheDir, cacheSize)
 
         val sharedOkHttpClient = OkHttpClient.Builder()
+            .addInterceptor(offlineInterceptor)
+            .addNetworkInterceptor(onlineInterceptor)
             .cache(myCache)
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor { chain ->
-                var request = chain.request()
-                request = if (hasNetwork(appContext)!!)
-                    request.newBuilder().header("Cache-Control", "public, max-age=" + 5).build()
-                else
-                    request.newBuilder().header(
-                        "Cache-Control",
-                        "public, only-if-cached, max-stale=" + 60 * 60 * 24 * 7
-                    ).build()
-                chain.proceed(request)
-            }
             .build()
 
         val moshi = Moshi.Builder()
@@ -74,8 +90,8 @@ class Dependencies(
             .create(EtherscanApi::class.java)
     }
 
-    private fun hasNetwork(context: Context): Boolean? {
-        var isConnected: Boolean? = false
+    private fun isInternetAvailable(context: Context): Boolean {
+        var isConnected = false // Initial Value
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
@@ -84,11 +100,15 @@ class Dependencies(
         return isConnected
     }
 
+
     override val tokensRepository: TokensRepository by lazy {
         TokensRepositoryImpl(ethExplorerApi)
     }
     override val balanceRepository: BalanceRepository by lazy {
         BalanceRepositoryImpl(etherscanApi)
+    }
+    override val getTokenAddressUseCase: GetTokenAddressUseCase by lazy {
+        GetTokenAddressUseCase()
     }
 }
 

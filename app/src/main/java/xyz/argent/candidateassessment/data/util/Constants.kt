@@ -5,8 +5,6 @@ object Constants {
     const val ethExplorerApiKey = "freekey"
     const val etherscanApiKey = "E5QFXD7ZYRH7THQM5PIXB8JD4GY38SEJZ4"
 
-    const val contractAddress = "0xc50c1c8b7cfcc868cae13654134f1078b3b8a0f2"
-
     /**
      * API routes
      */

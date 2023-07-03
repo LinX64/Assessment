@@ -19,7 +19,7 @@ import xyz.argent.candidateassessment.ui.views.tokens.TokenResult
 @Composable
 fun TokenRow(
     modifier: Modifier = Modifier,
-    token: TokenResult
+    balance: String
 ) {
     Card(
         modifier = modifier
@@ -27,11 +27,11 @@ fun TokenRow(
             .height(64.dp),
     ) {
         Column(modifier = modifier.fillMaxSize()) {
-            USDCBalanceRow(balance = token.balance)
+            USDCBalanceRow(balance = balance)
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            USDTBalanceRow(name = token.name)
+            USDTBalanceRow(name = balance)
         }
     }
 }

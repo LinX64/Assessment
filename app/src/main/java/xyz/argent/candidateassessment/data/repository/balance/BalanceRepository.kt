@@ -6,9 +6,9 @@ import xyz.argent.candidateassessment.data.util.Constants
 
 interface BalanceRepository {
     fun getTokenBalance(
-        contractAddress: String = Constants.contractAddress,
-        address: String = Constants.walletAddress,
-        apiKey: String = Constants.etherscanApiKey
+        contractAddress: String,
+        address: String,
+        apiKey: String
     ): Flow<TokenBalanceResponse>
 }
 

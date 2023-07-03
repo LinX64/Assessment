@@ -7,31 +7,62 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import xyz.argent.candidateassessment.App
+import xyz.argent.candidateassessment.data.model.TokenResponse
 import xyz.argent.candidateassessment.data.repository.balance.BalanceRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
+import xyz.argent.candidateassessment.data.util.Constants
+import xyz.argent.candidateassessment.data.util.Result
 import xyz.argent.candidateassessment.data.util.Result.Error
 import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
+import xyz.argent.candidateassessment.domain.GetTokenAddressUseCase
+import java.math.BigDecimal
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
-    val balanceRepository: BalanceRepository,
-    val tokensRepository: TokensRepository
+    private val tokensRepository: TokensRepository,
+    private val balanceRepository: BalanceRepository,
+    private val getTokenAddressUseCase: GetTokenAddressUseCase
 ) : ViewModel() {
 
     val searchQuery = savedStateHandle.getStateFlow(SEARCH_QUERY, "")
+    private val tokens = mutableListOf<TokenResponse>()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    val topTokensState: StateFlow<TokensUiState> = tokensRepository.getTopTokens()
+        .asResult()
+        .map(::handleTopTokensResponse)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = TokensUiState.Loading
+        )
+
+    private fun handleTopTokensResponse(result: Result<List<TokenResponse>>) = when (result) {
+        is Success -> {
+            tokens.apply { clear(); addAll(result.data) }
+            TokensUiState.TopTokensSuccess
+        }
+
+        is Loading -> TokensUiState.Loading
+        is Error -> TokensUiState.LoadingFailed(result.exception?.message ?: "Error")
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val searchResultState: StateFlow<TokensUiState> = searchQuery
+        .debounce(500L)
+        .distinctUntilChanged()
         .flatMapLatest(::getTokenBalance)
         .stateIn(
             scope = viewModelScope,
@@ -39,19 +70,22 @@ class TokensViewModel(
             initialValue = TokensUiState.Loading
         )
 
-    private suspend fun getTokenBalance(query: String): Flow<TokensUiState> {
+    private fun getTokenBalance(query: String): Flow<TokensUiState> {
         if (query.isEmpty()) return flowOf(TokensUiState.EmptyQuery)
-        val tokenAddress = tokensRepository.getAddressBy(token = query)
-        return balanceRepository.getTokenBalance(address = tokenAddress)
-            .asResult()
+        val tokenAddress = getTokenAddressUseCase(tokens = tokens, query = query)
+
+        tokenAddress ?: return flowOf(TokensUiState.EmptyResponse)
+        return balanceRepository.getTokenBalance(
+            contractAddress = tokenAddress,
+            address = Constants.walletAddress,
+            apiKey = Constants.etherscanApiKey
+        ).asResult()
             .map {
                 when (it) {
-                    is Success -> TokensUiState.Success(
-                        TokenResult(
-                            name = query,
-                            balance = it.data.result
-                        )
-                    )
+                    is Success -> {
+                        val balance = it.data.result
+                        TokensUiState.Success(balance)
+                    }
 
                     is Loading -> TokensUiState.Loading
                     is Error -> TokensUiState.LoadingFailed(it.exception?.message ?: "Error")
@@ -75,10 +109,12 @@ class TokensViewModel(
                 val tokensRepository = application.dependencies.tokensRepository
                 val savedStateHandle = SavedStateHandle()
                 val balanceRepository = application.dependencies.balanceRepository
+                val getTokenAddressUseCase = application.dependencies.getTokenAddressUseCase
                 TokensViewModel(
                     savedStateHandle = savedStateHandle,
                     tokensRepository = tokensRepository,
-                    balanceRepository = balanceRepository
+                    balanceRepository = balanceRepository,
+                    getTokenAddressUseCase = getTokenAddressUseCase
                 )
             }
         }
@@ -90,13 +126,9 @@ sealed interface TokensUiState {
     object EmptyQuery : TokensUiState
     object EmptyResponse : TokensUiState
     object SearchNotReady : TokensUiState
+    object TopTokensSuccess : TokensUiState
     data class LoadingFailed(val error: String) : TokensUiState
-    data class Success(val tokenResult: TokenResult) : TokensUiState
+    data class Success(val balance: String) : TokensUiState
 }
 
 private const val SEARCH_QUERY = "searchQuery"
-
-data class TokenResult(
-    val name: String,
-    val balance: String
-)

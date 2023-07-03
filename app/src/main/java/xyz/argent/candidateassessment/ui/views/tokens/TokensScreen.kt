@@ -23,7 +23,9 @@ internal fun TokensRoute(
     val tokensViewModel: TokensViewModel =
         viewModel(factory = TokensViewModel.Factory)
     val searchResultState by tokensViewModel.searchResultState.collectAsStateWithLifecycle()
+    val topTokensState by tokensViewModel.topTokensState.collectAsStateWithLifecycle()
     val searchQuery by tokensViewModel.searchQuery.collectAsStateWithLifecycle()
+
     TokensScreen(
         searchResultState = searchResultState,
         searchQuery = searchQuery,
@@ -71,8 +73,10 @@ fun TokensScreen(
             }
 
             is TokensUiState.Success -> {
-                SearchResultBody(tokenResult = searchResultState.tokenResult)
+                SearchResultBody(balance = searchResultState.balance)
             }
+
+            else -> {}
         }
     }
 }
@@ -80,19 +84,19 @@ fun TokensScreen(
 @Composable
 fun SearchResultBody(
     modifier: Modifier = Modifier,
-    tokenResult: TokenResult
+    balance: String
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item(key = tokenResult.name) {
+        item(key = balance) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                TokenRow(token = tokenResult)
+                TokenRow(balance = balance)
             }
         }
     }
