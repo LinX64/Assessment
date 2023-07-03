@@ -34,6 +34,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isContainer
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -76,7 +77,7 @@ fun SearchBarView(
                     false
                 }
             }
-            .semantics { testTag = "SearchScreen"; isContainer = true }
+            .semantics { contentDescription = "SearchScreen"; isContainer = true }
     ) {
         SearchBar(
             modifier = modifier

@@ -28,6 +28,7 @@ import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
 import xyz.argent.candidateassessment.domain.GetTokenAddressUseCase
+import xyz.argent.candidateassessment.util.formatBalance
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -82,7 +83,7 @@ class TokensViewModel(
             .map {
                 when (it) {
                     is Success -> {
-                        val balance = it.data.result
+                        val balance = it.data.result.formatBalance()
                         TokensUiState.Success(balance)
                     }
 

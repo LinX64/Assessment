@@ -8,6 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,8 +22,7 @@ import xyz.argent.candidateassessment.ui.views.tokens.components.SearchBarView
 
 @Composable
 fun TokensRoute() {
-    val tokensViewModel: TokensViewModel =
-        viewModel(factory = TokensViewModel.Factory)
+    val tokensViewModel: TokensViewModel = viewModel(factory = TokensViewModel.Factory)
     val searchResultState by tokensViewModel.searchResultState.collectAsStateWithLifecycle()
     val topTokensState by tokensViewModel.topTokensState.collectAsStateWithLifecycle()
     // Can't remove this because the ViewModel is not initialized yet, can be fixed by adding hiltViewModel()
@@ -69,7 +70,7 @@ private fun EmptyResponseView() {
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .height(24.dp)
+                .height(24.dp).semantics { contentDescription = "No results found" }
         )
     }
 }
@@ -78,11 +79,12 @@ private fun EmptyResponseView() {
 private fun LoadingFailedView() {
     BaseCenterColumn {
         Text(
+            modifier = Modifier
+                .semantics { contentDescription = "Something went wrong" }
+                .height(24.dp),
             text = "Something went wrong",
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .height(24.dp)
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -91,6 +93,7 @@ private fun LoadingFailedView() {
 private fun DefaultContent() {
     BaseCenterColumn {
         Text(
+            modifier = Modifier.semantics { contentDescription = "Search for a token" },
             text = "Please enter a token name to search for",
             textAlign = TextAlign.Center
         )

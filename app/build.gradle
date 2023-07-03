@@ -40,6 +40,12 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.6"
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -67,15 +73,31 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
 
     implementation ('org.web3j:core:4.8.7-android')
+    implementation 'com.google.code.gson:gson:2.10.1'
 
     // Android Studio Preview support
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    def coroutinesVersion = '1.7.1'
+    def coroutinesVersion = '1.7.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+
+    // Compose UI Testing
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.4.3'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.4.3")
+
+    testImplementation 'app.cash.turbine:turbine:1.0.0'
+
+    testImplementation 'org.amshove.kluent:kluent-android:1.65'
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:1.8.21"
+
+    def mockitoVersion = "5.3.1"
+    testImplementation 'org.mockito:mockito-core:5.3.1'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.0.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
