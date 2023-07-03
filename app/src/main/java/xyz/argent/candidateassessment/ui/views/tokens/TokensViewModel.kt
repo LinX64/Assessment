@@ -56,7 +56,7 @@ class TokensViewModel(
         }
 
         is Loading -> TokensUiState.Loading
-        is Error -> TokensUiState.LoadingFailed(result.exception?.message ?: "Error")
+        is Error -> TokensUiState.Error(result.exception?.message ?: "Error")
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -74,9 +74,8 @@ class TokensViewModel(
         if (query.isEmpty()) return flowOf(TokensUiState.EmptyQuery)
         val tokenAddress = getTokenAddressUseCase(tokens = tokens, query = query)
 
-        tokenAddress ?: return flowOf(TokensUiState.EmptyResponse)
         return balanceRepository.getTokenBalance(
-            contractAddress = tokenAddress,
+            contractAddress = tokenAddress ?: return flowOf(TokensUiState.Error("Error")),
             address = Constants.walletAddress,
             apiKey = Constants.etherscanApiKey
         ).asResult()
@@ -88,7 +87,7 @@ class TokensViewModel(
                     }
 
                     is Loading -> TokensUiState.Loading
-                    is Error -> TokensUiState.LoadingFailed(it.exception?.message ?: "Error")
+                    is Error -> TokensUiState.Error(it.exception?.message ?: "Error")
                 }
             }
     }
@@ -131,7 +130,7 @@ sealed interface TokensUiState {
     object EmptyResponse : TokensUiState
     object SearchNotReady : TokensUiState
     object TopTokensSuccess : TokensUiState
-    data class LoadingFailed(val error: String) : TokensUiState
+    data class Error(val error: String) : TokensUiState
     data class Success(val balance: String) : TokensUiState
 }
 
