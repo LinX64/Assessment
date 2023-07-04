@@ -83,7 +83,7 @@ private fun TokenRowPreview() {
     TokenRow(
         token = listOf(
             Token(
-                balance = 100.0,
+                balance = "",
                 symbol = "USDC"
             )
         )[0]

@@ -12,6 +12,6 @@ class GetTokensAddressUseCase {
             token.symbol?.contains(query, ignoreCase = true) == true
         }
 
-        return filteredTokens.map { token -> token.address }
+        return filteredTokens.map { it.address }
     }
 }

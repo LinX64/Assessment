@@ -23,8 +23,8 @@ class BalanceRepositoryImpl(
         emit(response)
     }.flowOn(ioDispatcher)
 
-    override fun getTokensBalance(tokensAddresses: List<String>): Flow<List<Double>> = flow {
-        val balances = mutableListOf<Double>()
+    override fun getTokensBalance(tokensAddresses: List<String>): Flow<List<String>> = flow {
+        val balances = mutableListOf<String>()
 
         tokensAddresses.forEach { address ->
             val tokenBalance = etherscanApi.getTokenBalance(
@@ -32,7 +32,7 @@ class BalanceRepositoryImpl(
                 address = Constants.walletAddress,
                 apiKey = Constants.etherscanApiKey
             ).result
-            balances.add(tokenBalance.toDouble())
+            balances.add(tokenBalance)
         }
 
         emit(balances)

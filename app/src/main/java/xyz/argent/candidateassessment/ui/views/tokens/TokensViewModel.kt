@@ -78,7 +78,7 @@ class TokensViewModel(
     }
 
     private fun handleTokensBalanceResponse(
-        result: Result<List<Double>>,
+        result: Result<List<String>>,
         tokensAddresses: List<String>
     ) = when (result) {
         is Success -> {
@@ -136,7 +136,7 @@ sealed interface TokensUiState {
 
 data class Token(
     val symbol: String,
-    val balance: Double
+    val balance: String
 )
 
 private const val SEARCH_QUERY = "searchQuery"
