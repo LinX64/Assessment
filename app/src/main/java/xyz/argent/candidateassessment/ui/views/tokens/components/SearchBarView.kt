@@ -1,7 +1,6 @@
 package xyz.argent.candidateassessment.ui.views.tokens.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -127,10 +126,13 @@ private fun LazyGridScope.onboardingView(searchUiState: TokensUiState) = when (s
     is TokensUiState.SearchNotReady -> Unit
 
     is TokensUiState.Success -> {
-        item {
-            Column(modifier = Modifier.padding(16.dp)) {
-                TokenRow(balance = searchUiState.balance)
-            }
+        items(
+            count = searchUiState.tokens.size,
+            key = { index -> searchUiState.tokens[index].symbol }
+        ) { index ->
+            TokenRow(
+                token = searchUiState.tokens[index]
+            )
         }
     }
 

@@ -9,5 +9,7 @@ interface BalanceRepository {
         address: String,
         apiKey: String
     ): Flow<TokenBalanceResponse>
+
+    fun getTokensBalance(tokensAddresses: List<String>): Flow<List<Double>>
 }
 

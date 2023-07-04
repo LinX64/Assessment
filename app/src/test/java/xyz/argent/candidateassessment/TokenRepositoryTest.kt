@@ -16,7 +16,7 @@ import xyz.argent.candidateassessment.data.repository.token.TokensRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepositoryImpl
 import xyz.argent.candidateassessment.util.StubUtil
 
-class TokensRepositoryTest {
+class TokenRepositoryTest {
 
     private lateinit var tokensRepository: TokensRepository
     private lateinit var ethExplorerApi: EthExplorerApi

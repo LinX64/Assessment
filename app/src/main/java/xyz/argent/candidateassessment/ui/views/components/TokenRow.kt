@@ -17,11 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import xyz.argent.candidateassessment.ui.views.tokens.Token
 
 @Composable
 fun TokenRow(
     modifier: Modifier = Modifier,
-    balance: String
+    token: Token
 ) {
     Card(
         modifier = modifier
@@ -37,11 +38,11 @@ fun TokenRow(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            USDCBalanceRow(balance = balance)
+            USDCBalanceRow(balance = token.balance.toString())
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            USDTBalanceRow(name = balance)
+            USDTBalanceRow(name = token.symbol)
         }
     }
 }
@@ -79,5 +80,12 @@ private fun USDTBalanceRow(name: String) {
 @Composable
 @Preview
 private fun TokenRowPreview() {
-    TokenRow(balance = "100")
+    TokenRow(
+        token = listOf(
+            Token(
+                balance = 100.0,
+                symbol = "USDC"
+            )
+        )[0]
+    )
 }

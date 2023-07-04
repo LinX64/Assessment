@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import xyz.argent.candidateassessment.data.model.TokenBalanceResponse
 import xyz.argent.candidateassessment.data.network.balanceRetriever.EtherscanApi
+import xyz.argent.candidateassessment.data.util.Constants
 
 class BalanceRepositoryImpl(
     private val etherscanApi: EtherscanApi,
@@ -20,6 +21,21 @@ class BalanceRepositoryImpl(
     ): Flow<TokenBalanceResponse> = flow {
         val response = etherscanApi.getTokenBalance(contractAddress, address, apiKey)
         emit(response)
+    }.flowOn(ioDispatcher)
+
+    override fun getTokensBalance(tokensAddresses: List<String>): Flow<List<Double>> = flow {
+        val balances = mutableListOf<Double>()
+
+        tokensAddresses.forEach { address ->
+            val tokenBalance = etherscanApi.getTokenBalance(
+                contractAddress = address,
+                address = Constants.walletAddress,
+                apiKey = Constants.etherscanApiKey
+            ).result
+            balances.add(tokenBalance.toDouble())
+        }
+
+        emit(balances)
     }.flowOn(ioDispatcher)
 
 }

@@ -64,12 +64,12 @@ internal fun TokensScreen(
 }
 
 @Composable
-fun ErrorView() {
+private fun ErrorView() {
     BaseCenterColumn {
         Text(
             text = "Something went wrong, please try again or check your internet connection",
             textAlign = TextAlign.Center,
-             modifier = Modifier
+            modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .semantics { contentDescription = "Something went wrong" }
         )
@@ -91,20 +91,6 @@ private fun EmptyResponseView() {
 }
 
 @Composable
-private fun LoadingFailedView() {
-    BaseCenterColumn {
-        Text(
-            modifier = Modifier
-                .semantics { contentDescription = "Something went wrong" }
-                .height(24.dp),
-            text = "Something went wrong",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
 private fun DefaultContent() {
     BaseCenterColumn {
         Text(
@@ -121,7 +107,7 @@ private fun DefaultContent() {
 @Composable
 private fun TokensPreview() {
     TokensScreen(
-        searchResultState = TokensUiState.Success(balance = "1000"),
+        searchResultState = TokensUiState.Success(emptyList()),
         onClear = {},
     )
 }

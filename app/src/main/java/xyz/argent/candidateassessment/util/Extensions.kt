@@ -7,7 +7,6 @@ fun String.formatBalance(decimalPlaces: Int = 18, exchangeRate: Double = 1.0): S
         .divide(BigDecimal.TEN.pow(decimalPlaces))
 
     val usdcBalance = balance.multiply(exchangeRate.toBigDecimal())
-
     return String.format("$%,.${decimalPlaces}f", usdcBalance)
 }
 

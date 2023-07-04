@@ -18,14 +18,13 @@ import xyz.argent.candidateassessment.data.repository.balance.BalanceRepository
 import xyz.argent.candidateassessment.data.repository.balance.BalanceRepositoryImpl
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepositoryImpl
-import xyz.argent.candidateassessment.domain.GetTokenAddressUseCase
-
+import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
 
 interface DependenciesContainer {
     val tokensRepository: TokensRepository
     val balanceRepository: BalanceRepository
 
-    val getTokenAddressUseCase: GetTokenAddressUseCase
+    val getTokensAddressUseCase: GetTokensAddressUseCase
 }
 
 /** Some manual dependency injection to simplify here */
@@ -107,8 +106,8 @@ class Dependencies(
     override val balanceRepository: BalanceRepository by lazy {
         BalanceRepositoryImpl(etherscanApi)
     }
-    override val getTokenAddressUseCase: GetTokenAddressUseCase by lazy {
-        GetTokenAddressUseCase()
+    override val getTokensAddressUseCase: GetTokensAddressUseCase by lazy {
+        GetTokensAddressUseCase()
     }
 }
 

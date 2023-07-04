@@ -8,7 +8,7 @@ import org.junit.Test
 import xyz.argent.candidateassessment.ui.views.tokens.TokensScreen
 import xyz.argent.candidateassessment.ui.views.tokens.TokensUiState
 
-class TokensSearchScreenTest {
+class TokenSearchScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
