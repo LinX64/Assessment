@@ -1,13 +1,9 @@
 package xyz.argent.candidateassessment.util
 
-import java.math.BigDecimal
+private const val MWEI_CONVERSION_FACTOR = 1_000_000_000_000.0
 
-fun String.formatBalance(decimalPlaces: Int = 18, exchangeRate: Double = 1.0): String {
-    val balance = this.toBigDecimal()
-        .divide(BigDecimal.TEN.pow(decimalPlaces))
-
-    val usdcBalance = balance.multiply(exchangeRate.toBigDecimal())
-    return String.format("$%,.${decimalPlaces}f", usdcBalance)
+fun formatWeiToMWei(wei: Long): String {
+    val mWei = wei.toDouble() / MWEI_CONVERSION_FACTOR
+    return "%.6f".format(mWei)
 }
-
 

@@ -28,6 +28,7 @@ import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
+import xyz.argent.candidateassessment.util.formatWeiToMWei
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -60,19 +61,18 @@ class TokensViewModel(
         val tokensAddress = getTokensAddressUseCase(tokens = tokens, query = query)
         return balanceRepository.getTokensBalance(tokensAddress)
             .asResult()
-            .map { handleTokensBalanceResponse(it, tokensAddress) }
+            .map { handleTokensBalanceResponse(it) }
     }
 
     private fun handleTokensBalanceResponse(
-        result: Result<List<String>>,
-        tokensAddresses: List<String>
+        result: Result<List<String>>
     ) = when (result) {
         is Success -> {
             if (result.data.isEmpty()) TokensUiState.EmptyResponse
             else TokensUiState.Success(tokens = result.data.mapIndexed { index, balance ->
                 Token(
-                    symbol = tokensAddresses[index], balance = balance
-                )
+                    symbol = tokens[index].symbol ?: "",
+                    balance = formatWeiToMWei(balance.toLong()))
             })
         }
 

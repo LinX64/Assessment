@@ -109,7 +109,7 @@ fun SearchBarView(
             LazyVerticalGrid(
                 modifier = modifier.fillMaxWidth(),
                 columns = GridCells.Adaptive(300.dp),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 onboardingView(searchUiState)
@@ -130,13 +130,8 @@ private fun LazyGridScope.onboardingView(searchUiState: TokensUiState) = when (s
     is TokensUiState.SearchNotReady -> Unit
 
     is TokensUiState.Success -> {
-        items(
-            count = searchUiState.tokens.size,
-            key = { index -> searchUiState.tokens[index].symbol }
-        ) { index ->
-            TokenRow(
-                token = searchUiState.tokens[index]
-            )
+        items(count = searchUiState.tokens.size) { index ->
+            TokenRow(token = searchUiState.tokens[index])
         }
     }
 
