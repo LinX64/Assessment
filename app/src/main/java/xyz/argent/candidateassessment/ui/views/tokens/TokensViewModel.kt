@@ -28,14 +28,12 @@ import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
-import xyz.argent.candidateassessment.domain.GetTokensRatesUseCase
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val tokensRepository: TokensRepository,
     private val balanceRepository: BalanceRepository,
-    private val getTokensAddressUseCase: GetTokensAddressUseCase,
-    private val getTokensRatesUseCase: GetTokensRatesUseCase
+    private val getTokensAddressUseCase: GetTokensAddressUseCase
 ) : ViewModel() {
 
     private val searchQuery = savedStateHandle.getStateFlow(SEARCH_QUERY, "")
@@ -60,18 +58,14 @@ class TokensViewModel(
 
     private fun getTokenBalance(query: String): Flow<TokensUiState> {
         val tokensAddress = getTokensAddressUseCase(tokens = tokens, query = query)
-        //val rates = getTokensRatesUseCase(tokens = tokens, tokensAddress = tokensAddress)
-        println("Tokens address: $tokensAddress")
-
-        // get tokens rates
-
         return balanceRepository.getTokensBalance(tokensAddress)
             .asResult()
             .map { handleTokensBalanceResponse(it, tokensAddress) }
     }
 
     private fun handleTokensBalanceResponse(
-        result: Result<List<String>>, tokensAddresses: List<String>
+        result: Result<List<String>>,
+        tokensAddresses: List<String>
     ) = when (result) {
         is Success -> {
             if (result.data.isEmpty()) TokensUiState.EmptyResponse
@@ -118,13 +112,11 @@ class TokensViewModel(
                 val savedStateHandle = SavedStateHandle()
                 val balanceRepository = application.dependencies.balanceRepository
                 val getTokenAddressUseCase = application.dependencies.getTokensAddressUseCase
-                val getTokensRatesUseCase = application.dependencies.getTokensRatesUseCase
                 TokensViewModel(
                     savedStateHandle = savedStateHandle,
                     tokensRepository = tokensRepository,
                     balanceRepository = balanceRepository,
-                    getTokensAddressUseCase = getTokenAddressUseCase,
-                    getTokensRatesUseCase = getTokensRatesUseCase
+                    getTokensAddressUseCase = getTokenAddressUseCase
                 )
             }
         }
@@ -136,7 +128,6 @@ sealed interface TokensUiState {
     object EmptyQuery : TokensUiState
     object EmptyResponse : TokensUiState
     object SearchNotReady : TokensUiState
-    data class TopTokensSuccess(val tokens: List<TokenResponse>) : TokensUiState
     data class Error(val error: String) : TokensUiState
     data class Success(val tokens: List<Token>) : TokensUiState
 }

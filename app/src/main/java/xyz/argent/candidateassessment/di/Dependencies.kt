@@ -19,7 +19,6 @@ import xyz.argent.candidateassessment.data.repository.balance.BalanceRepositoryI
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepositoryImpl
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
-import xyz.argent.candidateassessment.domain.GetTokensRatesUseCase
 
 interface DependenciesContainer {
     val tokensRepository: TokensRepository
