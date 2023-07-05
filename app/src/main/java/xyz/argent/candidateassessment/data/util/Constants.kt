@@ -8,6 +8,7 @@ object Constants {
     /**
      * API routes
      */
+    const val BASE_URL = "https://ethplorer.io/"
     const val GET_TOP_TOKENS = "/getTopTokens"
     const val GET_TOKEN_BALANCE = "/api?module=account&action=tokenbalance&tag=latest"
 }

@@ -18,6 +18,7 @@ import xyz.argent.candidateassessment.data.repository.balance.BalanceRepository
 import xyz.argent.candidateassessment.data.repository.balance.BalanceRepositoryImpl
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepositoryImpl
+import xyz.argent.candidateassessment.domain.FormatBalanceUseCase
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
 
 interface DependenciesContainer {
@@ -25,6 +26,7 @@ interface DependenciesContainer {
     val balanceRepository: BalanceRepository
 
     val getTokensAddressUseCase: GetTokensAddressUseCase
+    val formatBalanceUseCase: FormatBalanceUseCase
 }
 
 /** Some manual dependency injection to simplify here */
@@ -109,6 +111,10 @@ class Dependencies(
 
     override val getTokensAddressUseCase: GetTokensAddressUseCase by lazy {
         GetTokensAddressUseCase()
+    }
+
+    override val formatBalanceUseCase: FormatBalanceUseCase by lazy {
+        FormatBalanceUseCase()
     }
 }
 

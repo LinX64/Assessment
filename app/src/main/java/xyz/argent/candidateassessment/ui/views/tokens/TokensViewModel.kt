@@ -22,23 +22,25 @@ import xyz.argent.candidateassessment.App
 import xyz.argent.candidateassessment.data.model.TokenResponse
 import xyz.argent.candidateassessment.data.repository.balance.BalanceRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
+import xyz.argent.candidateassessment.data.util.Constants
 import xyz.argent.candidateassessment.data.util.Result
 import xyz.argent.candidateassessment.data.util.Result.Error
 import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
+import xyz.argent.candidateassessment.domain.FormatBalanceUseCase
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
-import xyz.argent.candidateassessment.util.formatWeiToMWei
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val tokensRepository: TokensRepository,
     private val balanceRepository: BalanceRepository,
-    private val getTokensAddressUseCase: GetTokensAddressUseCase
+    private val getTokensAddressUseCase: GetTokensAddressUseCase,
+    private val formatBalanceUseCase: FormatBalanceUseCase
 ) : ViewModel() {
 
     private val searchQuery = savedStateHandle.getStateFlow(SEARCH_QUERY, "")
-    private val tokens = mutableListOf<TokenResponse>()
+    private lateinit var tokens: List<TokenResponse>
 
     init {
         fetchTopTokens()
@@ -65,14 +67,16 @@ class TokensViewModel(
     }
 
     private fun handleTokensBalanceResponse(
-        result: Result<List<String>>
+        result: Result<Map<String, String>>
     ) = when (result) {
         is Success -> {
             if (result.data.isEmpty()) TokensUiState.EmptyResponse
-            else TokensUiState.Success(tokens = result.data.mapIndexed { index, balance ->
+            else TokensUiState.Success(tokens = result.data.entries.mapIndexed { index, entry ->
                 Token(
                     symbol = tokens[index].symbol ?: "",
-                    balance = formatWeiToMWei(balance.toLong()))
+                    imgUrl = Constants.BASE_URL + tokens[index].image,
+                    balance = entry.value
+                )
             })
         }
 
@@ -85,10 +89,7 @@ class TokensViewModel(
             .asResult()
             .map {
                 when (it) {
-                    is Success -> {
-                        tokens.clear();tokens.addAll(it.data)
-                    }
-
+                    is Success -> tokens = it.data
                     is Loading -> TokensUiState.Loading
                     is Error -> TokensUiState.Error(it.exception?.message ?: "Error")
                 }
@@ -112,11 +113,14 @@ class TokensViewModel(
                 val savedStateHandle = SavedStateHandle()
                 val balanceRepository = application.dependencies.balanceRepository
                 val getTokenAddressUseCase = application.dependencies.getTokensAddressUseCase
+                val formatBalanceUseCase = application.dependencies.formatBalanceUseCase
+
                 TokensViewModel(
                     savedStateHandle = savedStateHandle,
                     tokensRepository = tokensRepository,
                     balanceRepository = balanceRepository,
-                    getTokensAddressUseCase = getTokenAddressUseCase
+                    getTokensAddressUseCase = getTokenAddressUseCase,
+                    formatBalanceUseCase = formatBalanceUseCase
                 )
             }
         }
