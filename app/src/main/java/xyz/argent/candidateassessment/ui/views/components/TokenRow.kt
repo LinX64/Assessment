@@ -28,7 +28,6 @@ fun TokenRow(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp),
-        border = CardDefaults.outlinedCardBorder(),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         )
@@ -38,7 +37,7 @@ fun TokenRow(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            USDCBalanceRow(balance = token.balance.toString())
+            USDCBalanceRow(balance = token.balance)
 
             Spacer(modifier = Modifier.height(8.dp))
 

@@ -15,3 +15,4 @@ data class TokenResponse(
     val decimals: Double?,
     val image: String?,
 )
+

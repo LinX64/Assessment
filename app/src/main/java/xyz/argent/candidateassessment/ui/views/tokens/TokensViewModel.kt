@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import xyz.argent.candidateassessment.App
@@ -27,34 +28,21 @@ import xyz.argent.candidateassessment.data.util.Result.Loading
 import xyz.argent.candidateassessment.data.util.Result.Success
 import xyz.argent.candidateassessment.data.util.asResult
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
+import xyz.argent.candidateassessment.domain.GetTokensRatesUseCase
 
 class TokensViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val tokensRepository: TokensRepository,
     private val balanceRepository: BalanceRepository,
-    private val getTokensAddressUseCase: GetTokensAddressUseCase
+    private val getTokensAddressUseCase: GetTokensAddressUseCase,
+    private val getTokensRatesUseCase: GetTokensRatesUseCase
 ) : ViewModel() {
 
     private val searchQuery = savedStateHandle.getStateFlow(SEARCH_QUERY, "")
     private val tokens = mutableListOf<TokenResponse>()
 
-    val topTokensState: StateFlow<TokensUiState> = tokensRepository.getTopTokens()
-        .asResult()
-        .map(::handleTopTokensResponse)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = TokensUiState.Loading
-        )
-
-    private fun handleTopTokensResponse(result: Result<List<TokenResponse>>) = when (result) {
-        is Success -> {
-            tokens.clear(); tokens.addAll(result.data)
-            TokensUiState.TopTokensSuccess
-        }
-
-        is Loading -> TokensUiState.Loading
-        is Error -> TokensUiState.Error(result.exception?.message ?: "Error")
+    init {
+        fetchTopTokens()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -67,33 +55,50 @@ class TokensViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = TokensUiState.Loading
+            initialValue = TokensUiState.EmptyQuery
         )
 
     private fun getTokenBalance(query: String): Flow<TokensUiState> {
-        val tokensAddresses = getTokensAddressUseCase(tokens = tokens, query = query)
-        return balanceRepository.getTokensBalance(tokensAddresses)
+        val tokensAddress = getTokensAddressUseCase(tokens = tokens, query = query)
+        //val rates = getTokensRatesUseCase(tokens = tokens, tokensAddress = tokensAddress)
+        println("Tokens address: $tokensAddress")
+
+        // get tokens rates
+
+        return balanceRepository.getTokensBalance(tokensAddress)
             .asResult()
-            .map { handleTokensBalanceResponse(it, tokensAddresses) }
+            .map { handleTokensBalanceResponse(it, tokensAddress) }
     }
 
     private fun handleTokensBalanceResponse(
-        result: Result<List<String>>,
-        tokensAddresses: List<String>
+        result: Result<List<String>>, tokensAddresses: List<String>
     ) = when (result) {
         is Success -> {
             if (result.data.isEmpty()) TokensUiState.EmptyResponse
-            else TokensUiState.Success(tokens = result.data
-                .mapIndexed { index, balance ->
-                    Token(
-                        symbol = tokensAddresses[index],
-                        balance = balance
-                    )
-                })
+            else TokensUiState.Success(tokens = result.data.mapIndexed { index, balance ->
+                Token(
+                    symbol = tokensAddresses[index], balance = balance
+                )
+            })
         }
 
         is Loading -> TokensUiState.Loading
         is Error -> TokensUiState.Error(result.exception?.message ?: "Error")
+    }
+
+    private fun fetchTopTokens() {
+        tokensRepository.getTopTokens()
+            .asResult()
+            .map {
+                when (it) {
+                    is Success -> {
+                        tokens.clear();tokens.addAll(it.data)
+                    }
+
+                    is Loading -> TokensUiState.Loading
+                    is Error -> TokensUiState.Error(it.exception?.message ?: "Error")
+                }
+            }.launchIn(viewModelScope)
     }
 
     fun onSearchClick(myQuery: String) {
@@ -113,11 +118,13 @@ class TokensViewModel(
                 val savedStateHandle = SavedStateHandle()
                 val balanceRepository = application.dependencies.balanceRepository
                 val getTokenAddressUseCase = application.dependencies.getTokensAddressUseCase
+                val getTokensRatesUseCase = application.dependencies.getTokensRatesUseCase
                 TokensViewModel(
                     savedStateHandle = savedStateHandle,
                     tokensRepository = tokensRepository,
                     balanceRepository = balanceRepository,
-                    getTokensAddressUseCase = getTokenAddressUseCase
+                    getTokensAddressUseCase = getTokenAddressUseCase,
+                    getTokensRatesUseCase = getTokensRatesUseCase
                 )
             }
         }
@@ -129,14 +136,9 @@ sealed interface TokensUiState {
     object EmptyQuery : TokensUiState
     object EmptyResponse : TokensUiState
     object SearchNotReady : TokensUiState
-    object TopTokensSuccess : TokensUiState
+    data class TopTokensSuccess(val tokens: List<TokenResponse>) : TokensUiState
     data class Error(val error: String) : TokensUiState
     data class Success(val tokens: List<Token>) : TokensUiState
 }
-
-data class Token(
-    val symbol: String,
-    val balance: String
-)
 
 private const val SEARCH_QUERY = "searchQuery"

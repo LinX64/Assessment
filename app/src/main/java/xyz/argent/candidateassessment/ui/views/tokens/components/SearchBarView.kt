@@ -1,6 +1,8 @@
 package xyz.argent.candidateassessment.ui.views.tokens.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -105,8 +107,10 @@ fun SearchBarView(
             )
         ) {
             LazyVerticalGrid(
+                modifier = modifier.fillMaxWidth(),
                 columns = GridCells.Adaptive(300.dp),
-                modifier = modifier.fillMaxWidth()
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 onboardingView(searchUiState)
             }

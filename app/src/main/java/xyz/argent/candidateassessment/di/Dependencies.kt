@@ -19,12 +19,14 @@ import xyz.argent.candidateassessment.data.repository.balance.BalanceRepositoryI
 import xyz.argent.candidateassessment.data.repository.token.TokensRepository
 import xyz.argent.candidateassessment.data.repository.token.TokensRepositoryImpl
 import xyz.argent.candidateassessment.domain.GetTokensAddressUseCase
+import xyz.argent.candidateassessment.domain.GetTokensRatesUseCase
 
 interface DependenciesContainer {
     val tokensRepository: TokensRepository
     val balanceRepository: BalanceRepository
 
     val getTokensAddressUseCase: GetTokensAddressUseCase
+    val getTokensRatesUseCase: GetTokensRatesUseCase
 }
 
 /** Some manual dependency injection to simplify here */
@@ -90,7 +92,7 @@ class Dependencies(
     }
 
     private fun isInternetAvailable(context: Context): Boolean {
-        var isConnected = false // Initial Value
+        var isConnected = false
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = connectivityManager.activeNetworkInfo
@@ -99,15 +101,20 @@ class Dependencies(
         return isConnected
     }
 
-
     override val tokensRepository: TokensRepository by lazy {
         TokensRepositoryImpl(ethExplorerApi)
     }
+
     override val balanceRepository: BalanceRepository by lazy {
         BalanceRepositoryImpl(etherscanApi)
     }
+
     override val getTokensAddressUseCase: GetTokensAddressUseCase by lazy {
         GetTokensAddressUseCase()
+    }
+
+    override val getTokensRatesUseCase: GetTokensRatesUseCase by lazy {
+        GetTokensRatesUseCase()
     }
 }
 
