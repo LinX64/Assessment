@@ -25,7 +25,6 @@ interface DependenciesContainer {
     val balanceRepository: BalanceRepository
 
     val getTokensAddressUseCase: GetTokensAddressUseCase
-    val getTokensRatesUseCase: GetTokensRatesUseCase
 }
 
 /** Some manual dependency injection to simplify here */
@@ -110,10 +109,6 @@ class Dependencies(
 
     override val getTokensAddressUseCase: GetTokensAddressUseCase by lazy {
         GetTokensAddressUseCase()
-    }
-
-    override val getTokensRatesUseCase: GetTokensRatesUseCase by lazy {
-        GetTokensRatesUseCase()
     }
 }
 
