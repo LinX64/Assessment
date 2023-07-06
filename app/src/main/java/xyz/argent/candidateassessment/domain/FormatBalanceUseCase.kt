@@ -1,7 +1,7 @@
 package xyz.argent.candidateassessment.domain
 
 import xyz.argent.candidateassessment.data.model.TokenResponse
-import java.math.BigDecimal
+import kotlin.math.pow
 
 class FormatBalanceUseCase {
 
@@ -49,14 +49,14 @@ class FormatBalanceUseCase {
      * e.g. 100.0 / 18.0 = 0.0000000000000001
      */
 
+    private fun divideBalance(balance: Double, decimal: Double): Double {
+        if (decimal == 0.0) return balance
 
-    private fun divideBalance(balance: Double, decimals: Double): Double {
-        if (decimals == 0.0) return balance
+        val dividedBalance = balance / 10.0.pow(decimal.toInt())
 
-        val dividedBalance = BigDecimal(balance)
-            .divide(BigDecimal(decimals), BigDecimal.ROUND_HALF_UP)
-            .setScale(6, BigDecimal.ROUND_HALF_UP)
-
-        return dividedBalance.toDouble()
+        val regexPattern = "[0-9]+\\.[0-9]{1,4}"
+        val formattedBalance = regexPattern.toRegex().find(dividedBalance.toString())?.value
+            ?: dividedBalance.toString()
+        return formattedBalance.toDouble()
     }
 }

@@ -61,6 +61,10 @@ class TokensViewModel(
 
     private fun getTokenBalance(query: String): Flow<TokensUiState> {
         val tokensAddress = getTokensAddressUseCase(tokens = tokens, query = query)
+        val tokensDecimals = tokens.map { it.decimals }
+
+        println("tokensDecimals: $tokensDecimals")
+
         return balanceRepository.getTokensBalance(
             tokensAddresses = tokensAddress,
             symbols = tokens.map { it.symbol }
