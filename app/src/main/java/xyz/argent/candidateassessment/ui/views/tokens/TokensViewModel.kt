@@ -61,7 +61,10 @@ class TokensViewModel(
 
     private fun getTokenBalance(query: String): Flow<TokensUiState> {
         val tokensAddress = getTokensAddressUseCase(tokens = tokens, query = query)
-        return balanceRepository.getTokensBalance(tokensAddress)
+        return balanceRepository.getTokensBalance(
+            tokensAddresses = tokensAddress,
+            symbols = tokens.map { it.symbol }
+        )
             .asResult()
             .map { handleTokensBalanceResponse(it) }
     }
@@ -71,13 +74,25 @@ class TokensViewModel(
     ) = when (result) {
         is Success -> {
             if (result.data.isEmpty()) TokensUiState.EmptyResponse
-            else TokensUiState.Success(tokens = result.data.entries.mapIndexed { index, entry ->
-                Token(
-                    symbol = tokens[index].symbol ?: "",
-                    imgUrl = Constants.BASE_URL + tokens[index].image,
-                    balance = entry.value
+            else {
+                val tokensMap = formatBalanceUseCase(
+                    tokens = tokens.toSet(),
+                    tokensBalances = result.data
                 )
-            })
+
+                println("TokensMap: $tokensMap")
+
+                TokensUiState.Success(
+                    tokens = tokensMap.map { (token, balance) ->
+                        val imgUrl = Constants.BASE_URL + tokens.first { it.symbol == token }.image
+                        Token(
+                            symbol = result.data.keys.first { it == token },
+                            imgUrl = imgUrl,
+                            balance = balance.toString()
+                        )
+                    }
+                )
+            }
         }
 
         is Loading -> TokensUiState.Loading

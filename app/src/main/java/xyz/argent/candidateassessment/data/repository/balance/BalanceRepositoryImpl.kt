@@ -23,7 +23,15 @@ class BalanceRepositoryImpl(
         emit(response)
     }.flowOn(ioDispatcher)
 
-    override fun getTokensBalance(tokensAddresses: List<String>): Flow<Map<String, String>> = flow {
+    /**
+     * Get the balance of multiple tokens based on their contract address
+     * @param tokensAddresses List of tokens contract addresses
+     * @return e.g. { "ETH": "100", "DAI": "200" }
+     */
+    override fun getTokensBalance(
+        tokensAddresses: List<String>,
+        symbols: List<String?>
+    ): Flow<Map<String, String>> = flow {
         val tokenBalancesMap = mutableMapOf<String, String>()
 
         tokensAddresses.forEach { address ->
@@ -33,7 +41,8 @@ class BalanceRepositoryImpl(
                 apiKey = Constants.etherscanApiKey
             ).result
 
-            tokenBalancesMap[address] = tokenBalance
+            val tokenSymbol = symbols[tokensAddresses.indexOf(address)] ?: address
+            tokenBalancesMap[tokenSymbol] = tokenBalance
         }
 
         emit(tokenBalancesMap)

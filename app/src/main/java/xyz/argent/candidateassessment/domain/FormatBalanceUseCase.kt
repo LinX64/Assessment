@@ -1,54 +1,62 @@
 package xyz.argent.candidateassessment.domain
 
-import android.util.Log
 import xyz.argent.candidateassessment.data.model.TokenResponse
-import kotlin.math.pow
+import java.math.BigDecimal
 
 class FormatBalanceUseCase {
 
     operator fun invoke(
         tokens: Set<TokenResponse>,
-        tokenBalances: Map<String, String>
-    ): Map<String?, Double?> {
-
-        Log.d("FormatBalanceUseCase", "invoke: tokens: $tokens")
-        Log.d("FormatBalanceUseCase", "invoke: tokenBalances: $tokenBalances")
+        tokensBalances: Map<String, String>
+    ): Map<String, Double> {
 
         /**
          * map of token symbols to decimals
          * e.g. "ETH" to 18.0
          */
-        val tokensMap = tokens
+        val tokensSymbolsMap = tokens
             .filter { it.symbol?.isNotEmpty() == true }
             .associate { it.symbol to handleDecimal(it.decimals) }
-
-        /**
-         * map of token symbols to balances
-         * e.g. "ETH" to 0.000000000000000001
-         * The division is being done here based on the decimals of the token.
-         */
-        return divideBalances(
-            tokensMap = tokensMap,
-            tokenBalances = tokenBalances
-        )
-            .mapValues { it.value }
             .toMap()
+
+        return divideBalances(tokensBalances, tokensSymbolsMap)
     }
 
     private fun handleDecimal(decimal: Double?): Double? =
         decimal?.let { "%.1f".format(it) }?.toDouble()
 
+    /**
+     * Map of token symbols to balances
+     * e.g. "USDT" to 100.0
+     * The division is being done here based on the decimals of the token.
+     */
     private fun divideBalances(
-        tokenBalances: Map<String, String>,
+        tokensBalances: Map<String, String>,
         tokensMap: Map<String?, Double?>
     ): Map<String, Double> {
-        return tokenBalances.map { (token, balance) ->
-            val decimals = tokensMap[token] ?: 0.0
-            token to divideBalance(balance.toDouble(), decimals)
+        return tokensBalances.mapNotNull { (token, balance) ->
+            try {
+                val decimals = tokensMap[token] ?: 0.0
+                token to divideBalance(balance.toDouble(), decimals)
+            } catch (e: NumberFormatException) {
+                null // Skip this token balance if it cannot be parsed
+            }
         }.toMap()
     }
 
+    /**
+     * Divides the balance by the decimals of the token
+     * e.g. 100.0 / 18.0 = 0.0000000000000001
+     */
+
+
     private fun divideBalance(balance: Double, decimals: Double): Double {
-        return (balance / 10.0.pow(decimals))
+        if (decimals == 0.0) return balance
+
+        val dividedBalance = BigDecimal(balance)
+            .divide(BigDecimal(decimals), BigDecimal.ROUND_HALF_UP)
+            .setScale(6, BigDecimal.ROUND_HALF_UP)
+
+        return dividedBalance.toDouble()
     }
 }

@@ -43,6 +43,7 @@ fun TokenRow(
         )
     ) {
         Row(
+            modifier = modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -55,7 +56,7 @@ fun TokenRow(
                 error = painterResource(R.drawable.baseline_cloud_24),
                 modifier = modifier
                     .clip(CircleShape)
-                    .padding(start = 5.dp)
+                    .padding(start = 8.dp)
                     .size(32.dp)
             )
 
