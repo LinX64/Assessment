@@ -47,5 +47,4 @@ class BalanceRepositoryImpl(
 
         emit(tokenBalancesMap)
     }.flowOn(ioDispatcher)
-
 }
